@@ -46,8 +46,9 @@ public sealed class FileUploadFormReader : FileWithPropertiesFormReader<FileUplo
 
                 break;
 
-            default:
-                throw new NotImplementedException($"Unknown property {propertyName}");
+            // TODO just log it
+            // default:
+            //     throw new NotImplementedException($"Unknown property {propertyName}");
         }
     }
 
