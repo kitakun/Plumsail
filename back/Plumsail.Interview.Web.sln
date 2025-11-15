@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.Web", "Plumsail.Interview.Web\Plumsail.Interview.Web.csproj", "{902432ED-7E86-46ED-8D19-FA9DF34487E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.Domain", "Plumsail.Interview.Domain\Plumsail.Interview.Domain.csproj", "{C2D66550-C53C-4CE9-B597-542896115D83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.Handlers", "Plumsail.Interview.Handlers\Plumsail.Interview.Handlers.csproj", "{9EFCCCF1-A5E8-493F-9560-BF99C82AC0A9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storage", "Storage", "{FF443789-F735-4780-933C-9E00B373BD96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.MemoryFileStorage", "Plumsail.Interview.MemoryFileStorage\Plumsail.Interview.MemoryFileStorage.csproj", "{E09A636F-6429-4E2D-8DE0-5093ECF0B302}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.MemoryDatabase", "Plumsail.Interview.MemoryDatabase\Plumsail.Interview.MemoryDatabase.csproj", "{0A9C820D-5413-455A-A597-DCFD65DCACB7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.DatabaseContext", "Plumsail.Interview.DatabaseContext\Plumsail.Interview.DatabaseContext.csproj", "{FA70050B-A515-4D54-B0A7-0EEECA3E2F78}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{902432ED-7E86-46ED-8D19-FA9DF34487E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{902432ED-7E86-46ED-8D19-FA9DF34487E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{902432ED-7E86-46ED-8D19-FA9DF34487E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{902432ED-7E86-46ED-8D19-FA9DF34487E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2D66550-C53C-4CE9-B597-542896115D83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2D66550-C53C-4CE9-B597-542896115D83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2D66550-C53C-4CE9-B597-542896115D83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2D66550-C53C-4CE9-B597-542896115D83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EFCCCF1-A5E8-493F-9560-BF99C82AC0A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EFCCCF1-A5E8-493F-9560-BF99C82AC0A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EFCCCF1-A5E8-493F-9560-BF99C82AC0A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EFCCCF1-A5E8-493F-9560-BF99C82AC0A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E09A636F-6429-4E2D-8DE0-5093ECF0B302}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E09A636F-6429-4E2D-8DE0-5093ECF0B302}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E09A636F-6429-4E2D-8DE0-5093ECF0B302}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E09A636F-6429-4E2D-8DE0-5093ECF0B302}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A9C820D-5413-455A-A597-DCFD65DCACB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A9C820D-5413-455A-A597-DCFD65DCACB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A9C820D-5413-455A-A597-DCFD65DCACB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A9C820D-5413-455A-A597-DCFD65DCACB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA70050B-A515-4D54-B0A7-0EEECA3E2F78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA70050B-A515-4D54-B0A7-0EEECA3E2F78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA70050B-A515-4D54-B0A7-0EEECA3E2F78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA70050B-A515-4D54-B0A7-0EEECA3E2F78}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E09A636F-6429-4E2D-8DE0-5093ECF0B302} = {FF443789-F735-4780-933C-9E00B373BD96}
+		{0A9C820D-5413-455A-A597-DCFD65DCACB7} = {FF443789-F735-4780-933C-9E00B373BD96}
+		{FA70050B-A515-4D54-B0A7-0EEECA3E2F78} = {FF443789-F735-4780-933C-9E00B373BD96}
+	EndGlobalSection
+EndGlobal

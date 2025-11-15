@@ -1,0 +1,69 @@
+@Plumsail.Interview.Web_HostAddress = https://localhost:7274
+
+### Get submissions list (with pagination)
+GET {{Plumsail.Interview.Web_HostAddress}}/api/submission?offset=0&limit=10
+Accept: application/json
+
+###
+
+### Get submissions list (no pagination)
+GET {{Plumsail.Interview.Web_HostAddress}}/api/submission
+Accept: application/json
+
+###
+
+### Search submissions by name or description
+GET {{Plumsail.Interview.Web_HostAddress}}/api/submission/search?searchTerm=test&offset=0&limit=10
+Accept: application/json
+
+###
+
+### Search submissions (no pagination)
+GET {{Plumsail.Interview.Web_HostAddress}}/api/submission/search?searchTerm=example
+Accept: application/json
+
+###
+
+### Upload files with metadata
+PUT {{Plumsail.Interview.Web_HostAddress}}/api/submission
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files[0].File"; filename="example1.txt"
+Content-Type: text/plain
+
+< ./example.txt
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files[0].Description"
+
+First file description
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files[0].Status"
+
+Pending
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files[0].Priority"
+
+High
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files[0].IsPublic"
+
+true
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files[1].File"; filename="example2.txt"
+Content-Type: text/plain
+
+< ./example.txt
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files[1].Description"
+
+Second file description
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### Get file by pre-sign token
+GET {{Plumsail.Interview.Web_HostAddress}}/api/submission/pre-sign?token=YOUR_TOKEN_HERE
+Accept: application/octet-stream
+
+###

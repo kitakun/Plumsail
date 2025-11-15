@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Mediator.Abstractions" Version="3.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+      <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+      <PackageReference Include="System.IO.Pipelines" Version="10.0.0" />
+      <PackageReference Include="System.Linq.Async" Version="6.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Plumsail.Interview.DatabaseContext\Plumsail.Interview.DatabaseContext.csproj" />
+      <ProjectReference Include="..\Plumsail.Interview.Domain\Plumsail.Interview.Domain.csproj" />
+    </ItemGroup>
+
+</Project>
