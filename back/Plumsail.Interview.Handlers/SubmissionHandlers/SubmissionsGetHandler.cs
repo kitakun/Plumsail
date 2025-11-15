@@ -18,44 +18,30 @@ public sealed class SubmissionsGetHandler(
     IMediator mediator
 ) : IRequestHandler<SubmissionsGetRequest, OperationResult<Pagination<FileRecord>>>
 {
-    private static IQueryable<SubmissionEntity> GetSubmissionsQuery(PlumsailDbContext context)
-    {
-        return context.Submissions.AsNoTracking();
-    }
-
-    private static readonly Func<PlumsailDbContext, int, int, IAsyncEnumerable<FileRecord>> GetFileRecordsQuery =
-        EF.CompileAsyncQuery(static (PlumsailDbContext context, int offset, int limit) =>
+    private static readonly Func<PlumsailDbContext, int, int, IAsyncEnumerable<FileRecord>> GetSubmissionsCompiled =
+        EF.CompileAsyncQuery((PlumsailDbContext context, int offset, int limit) =>
             context.Submissions
                 .AsNoTracking()
-                .OrderBy(static s => s.CreatedDate)
-                .ThenBy(static s => s.Id)
+                .OrderBy(s => s.Id)
                 .Skip(offset)
                 .Take(limit)
-                .Select(static s => new FileRecord
+                .Select(s => new FileRecord
                 {
                     Id = s.Id,
-                    Name = s.Name,
-                    Size = s.Size,
-                    Type = s.Type,
-                    Description = s.Description,
-                    Status = s.Status,
-                    CreatedDate = s.CreatedDate,
-                    Priority = s.Priority,
-                    IsPublic = s.IsPublic
-                })
-        );
+                    FileData = s.FileData ?? new FileData(string.Empty, 0, string.Empty),
+                    Payload = s.Payload
+                }));
 
     public async ValueTask<OperationResult<Pagination<FileRecord>>> Handle(SubmissionsGetRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var totalCount = await GetSubmissionsQuery(dbContext).CountAsync(cancellationToken);
+            var totalCount = await dbContext.Submissions.CountAsync(cancellationToken);
 
-            var fileRecords = await GetFileRecordsQuery(
-                    dbContext,
-                    request.Offset ?? 0,
-                    request.Limit ?? totalCount)
-                .ToListAsync(cancellationToken);
+            var offset = request.Offset ?? 0;
+            var limit = request.Limit ?? totalCount;
+
+            var fileRecords = await GetSubmissionsCompiled(dbContext, offset, limit).ToListAsync(cancellationToken);
 
             List<FileRecord> fileRecordsWithPreSign;
 

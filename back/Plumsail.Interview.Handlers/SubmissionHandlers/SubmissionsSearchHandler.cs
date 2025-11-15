@@ -1,4 +1,5 @@
 using Mediator;
+using System.Text.Json;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -17,90 +18,78 @@ public sealed class SubmissionsSearchHandler(
     PlumsailDbContext dbContext,
     IMediator mediator) : IRequestHandler<SubmissionsSearchRequest, OperationResult<Pagination<FileRecord>>>
 {
-    private static readonly Func<PlumsailDbContext, IAsyncEnumerable<SubmissionEntity>> GetNoTrackingSubmissionsAsync =
-        EF.CompileAsyncQuery((PlumsailDbContext context) =>
-            context.Submissions.AsNoTracking());
-
-    private static readonly Func<PlumsailDbContext, string, IAsyncEnumerable<SubmissionEntity>> SearchSubmissionsAsync =
-        EF.CompileAsyncQuery((PlumsailDbContext context, string searchTerm) =>
-            context.Submissions
-                .AsNoTracking()
-                .Where(s =>
-                    s.Name.ToLower().Contains(searchTerm) ||
-                    (s.Description != null && s.Description.ToLower().Contains(searchTerm))));
-
-    private static readonly Func<PlumsailDbContext, string, int, int, IAsyncEnumerable<FileRecord>> GetSearchFileRecordsQueryAsync =
-        EF.CompileAsyncQuery((PlumsailDbContext context, string searchTerm, int offset, int limit) =>
-            context.Submissions
-                .AsNoTracking()
-                .Where(s =>
-                    s.Name.ToLower().Contains(searchTerm) ||
-                    (s.Description != null && s.Description.ToLower().Contains(searchTerm)))
-                .OrderBy(s => s.CreatedDate)
-                .ThenBy(s => s.Id)
-                .Skip(offset)
-                .Take(limit)
-                .Select(s => new FileRecord
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Size = s.Size,
-                    Type = s.Type,
-                    Description = s.Description,
-                    Status = s.Status,
-                    CreatedDate = s.CreatedDate,
-                    Priority = s.Priority,
-                    IsPublic = s.IsPublic
-                }));
-
-    private static readonly Func<PlumsailDbContext, int, int, IAsyncEnumerable<FileRecord>> GetFileRecordsQueryAsync =
-        EF.CompileAsyncQuery((PlumsailDbContext context, int offset, int limit) =>
-            context.Submissions
-                .AsNoTracking()
-                .OrderBy(s => s.CreatedDate)
-                .ThenBy(s => s.Id)
-                .Skip(offset)
-                .Take(limit)
-                .Select(s => new FileRecord
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Size = s.Size,
-                    Type = s.Type,
-                    Description = s.Description,
-                    Status = s.Status,
-                    CreatedDate = s.CreatedDate,
-                    Priority = s.Priority,
-                    IsPublic = s.IsPublic
-                }));
+    private static FileRecord MapToFileRecord(SubmissionEntity entity)
+    {
+        return new FileRecord
+        {
+            Id = entity.Id,
+            FileData = entity.FileData ?? new FileData(string.Empty, 0, string.Empty),
+            Payload = entity.Payload
+        };
+    }
 
     public async ValueTask<OperationResult<Pagination<FileRecord>>> Handle(SubmissionsSearchRequest request, CancellationToken cancellationToken)
     {
         try
         {
             int totalCount;
-            List<FileRecord> fileRecords;
+            List<SubmissionEntity> submissions;
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var searchTerm = request.SearchTerm.Trim().ToLower();
-                totalCount = await SearchSubmissionsAsync(dbContext, searchTerm).CountAsync(cancellationToken);
-                fileRecords = await GetSearchFileRecordsQueryAsync(
-                        dbContext,
-                        searchTerm,
-                        request.Offset ?? 0,
-                        request.Limit ?? totalCount)
+                var allSubmissions = await dbContext.Submissions
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken);
+                
+                submissions = allSubmissions
+                    .Where(s =>
+                        (s.FileData.HasValue && s.FileData.Value.Name.ToLower().Contains(searchTerm)) ||
+                        (s.Payload.ValueKind != JsonValueKind.Undefined && 
+                         s.Payload.TryGetProperty("Description", out var desc) && 
+                         desc.ValueKind == JsonValueKind.String &&
+                         desc.GetString() != null &&
+                         desc.GetString()!.ToLower().Contains(searchTerm)))
+                    .OrderBy(s =>
+                    {
+                        if (s.Payload.ValueKind == JsonValueKind.Undefined || !s.Payload.TryGetProperty("CreatedDate", out var cd))
+                            return DateTime.MinValue;
+                        if (cd.ValueKind == JsonValueKind.String && DateTime.TryParse(cd.GetString(), out var parsedDate))
+                            return parsedDate;
+                        return DateTime.MinValue;
+                    })
+                    .ThenBy(s => s.Id)
+                    .ToList();
+                
+                totalCount = submissions.Count;
+                submissions = submissions
+                    .Skip(request.Offset ?? 0)
+                    .Take(request.Limit ?? totalCount)
+                    .ToList();
             }
             else
             {
-                totalCount = await GetNoTrackingSubmissionsAsync(dbContext).CountAsync(cancellationToken);
-                fileRecords = await GetFileRecordsQueryAsync(
-                        dbContext,
-                        request.Offset ?? 0,
-                        request.Limit ?? totalCount)
+                var allSubmissions = await dbContext.Submissions
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken);
+                
+                totalCount = allSubmissions.Count;
+                submissions = allSubmissions
+                    .OrderBy(s =>
+                    {
+                        if (s.Payload.ValueKind == JsonValueKind.Undefined || !s.Payload.TryGetProperty("CreatedDate", out var cd))
+                            return DateTime.MinValue;
+                        if (cd.ValueKind == JsonValueKind.String && DateTime.TryParse(cd.GetString(), out var parsedDate))
+                            return parsedDate;
+                        return DateTime.MinValue;
+                    })
+                    .ThenBy(s => s.Id)
+                    .Skip(request.Offset ?? 0)
+                    .Take(request.Limit ?? totalCount)
+                    .ToList();
             }
+
+            var fileRecords = submissions.Select(MapToFileRecord).ToList();
 
             var preSignTasks = fileRecords.Select(async fileRecord =>
             {

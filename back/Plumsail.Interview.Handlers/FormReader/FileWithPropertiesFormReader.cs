@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 namespace Plumsail.Interview.Handlers.FormReader;
 
 /// <summary>
-/// Manual parser of POCO object with file in it
+/// Manual parser of POCO object with optional<file> in it
 /// </summary>
 /// <typeparam name="T">POCO object type</typeparam>
 public abstract partial class FileWithPropertiesFormReader<T> where T : new()
@@ -48,7 +48,7 @@ public abstract partial class FileWithPropertiesFormReader<T> where T : new()
                 continue;
             }
 
-            // Parse field name like "files[0].File" or "files[0].Description"
+            // Parse field name like "files[0].File", "files[0].Description", "[0].FirstName", "[0].Tags[0]"
             var match = UploadedFilesRegex().Match(fieldName);
             if (!match.Success)
             {
@@ -57,6 +57,7 @@ public abstract partial class FileWithPropertiesFormReader<T> where T : new()
 
             var index = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
             var propertyName = match.Groups[2].Value;
+            var arrayIndex = match.Groups[3].Success ? int.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture) : (int?)null;
 
             if (!currentFileRecords.TryGetValue(index, out var record))
             {
@@ -83,32 +84,23 @@ public abstract partial class FileWithPropertiesFormReader<T> where T : new()
                 using var streamReader = new StreamReader(section.Body, Encoding.UTF8, leaveOpen: false);
                 var value = await streamReader.ReadToEndAsync(cancellationToken);
 
-                SetProperty(ref record, propertyName, value);
+                SetProperty(ref record, propertyName, value, arrayIndex);
             }
 
             currentFileRecords[index] = record;
         }
 
         // Process all collected file records and yield them
-        var hasFiles = false;
-        foreach (var fileRecord in currentFileRecords.Select(kvp => kvp.Value).Where(HasValidFileData))
+        foreach (var entry in currentFileRecords.Select(kvp => kvp.Value))
         {
-            hasFiles = true;
-            yield return fileRecord;
-        }
-
-        if (!hasFiles)
-        {
-            throw new InvalidOperationException("No files provided");
+            yield return entry;
         }
     }
 
-    protected abstract void SetProperty(ref T form, string propertyName, string value);
+    protected abstract void SetProperty(ref T form, string propertyName, string value, int? arrayIndex);
 
     protected abstract void SetFileData(ref T record, string fileName, string contentType, long size, Stream stream);
 
-    protected abstract bool HasValidFileData(T record);
-
-    [GeneratedRegex(@"files\[(\d+)\]\.(\w+)")]
+    [GeneratedRegex(@"(?:files)?\[(\d+)\]\.(\w+)(?:\[(\d+)\])?")]
     private static partial Regex UploadedFilesRegex();
 }

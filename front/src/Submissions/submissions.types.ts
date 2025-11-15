@@ -1,20 +1,27 @@
-export type FileRecord = {
-  id: string;
+export type FileData = {
   name: string;
   size: number;
   type: string;
+};
+
+export type FileRecord = {
+  id: string;
+  fileData: FileData;
   preSign?: string;
-  description?: string;
-  status?: SubmissionStatus;
-  createdDate?: string;
-  priority?: PriorityLevel;
-  isPublic?: boolean;
+  payload: {
+    Description?: string;
+    Status?: SubmissionStatus;
+    CreatedDate?: string;
+    Priority?: PriorityLevel;
+    IsPublic?: boolean;
+    [key: string]: any;
+  };
 };
 
 export type FileSubmission = {
   file: File;
   description?: string;
-  unknownProperty?: string;
+  payload?: string;
   status?: SubmissionStatus;
   priority?: PriorityLevel;
   isPublic?: boolean;

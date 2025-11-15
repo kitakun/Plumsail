@@ -1,4 +1,5 @@
 using Mediator;
+using System.Text.Json;
 
 using Plumsail.Interview.DatabaseContext;
 using Plumsail.Interview.Domain.Entities;
@@ -16,7 +17,8 @@ public readonly record struct FileUploadData(
     SubmissionStatusEnum? Status,
     DateTime? CreatedDate,
     PriorityLevelEnum? Priority,
-    bool? IsPublic);
+    bool? IsPublic,
+    Dictionary<string, object>? Payload = null);
 
 public sealed record SubmissionsPutRequest(
     IAsyncEnumerable<FileUploadData> FileUploadData
@@ -39,31 +41,44 @@ public sealed class SubmissionsPutHandler(
             {
                 var fileId = identityProvider.GenerateId();
 
+                var payload = file.Payload != null
+                    ? file.Payload.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value)
+                    : new Dictionary<string, object?>();
+                
+                // Ensure CreatedDate is always set
+                if (!payload.ContainsKey("CreatedDate"))
+                {
+                    payload["CreatedDate"] = DateTime.UtcNow;
+                }
+
+                var payloadJson = JsonSerializer.SerializeToElement(payload);
+
+                // Generate a filename if none is provided (for form data without file uploads)
+                var fileName = !string.IsNullOrEmpty(file.FileName) 
+                    ? file.FileName 
+                    : $"form-data-{fileId}";
+                var contentType = !string.IsNullOrEmpty(file.ContentType)
+                    ? file.ContentType
+                    : "application/json";
+
                 var fileRecord = new FileRecord
                 {
                     Id = fileId,
-                    Name = file.FileName,
-                    Size = file.Size,
-                    Type = file.ContentType,
+                    FileData = new FileData(fileName, file.Size, contentType),
+                    Payload = payloadJson,
                     Stream = file.Stream
                 };
 
                 var submissionEntity = new SubmissionEntity
                 {
                     Id = fileId,
-                    Name = file.FileName,
-                    Size = file.Size,
-                    Type = file.ContentType,
-                    Description = file.Description,
-                    Status = file.Status,
-                    CreatedDate = file.CreatedDate ?? DateTime.UtcNow,
-                    Priority = file.Priority,
-                    IsPublic = file.IsPublic
+                    FileData = new FileData(fileName, file.Size, contentType),
+                    Payload = payloadJson
                 };
 
                 fileRecords.Add(fileRecord);
                 dbContext.Submissions.Add(submissionEntity);
-                fileDictionary[file.FileName] = fileId;
+                fileDictionary[fileName] = fileId;
             }
 
             await fileStorageProvider.SaveFilesAsync(fileRecords, cancellationToken);

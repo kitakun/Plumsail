@@ -6,9 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Plumsail.Interview.DatabaseContext;
 using Plumsail.Interview.Domain.Models;
 
-using System.Security.Cryptography;
-using System.Text;
-
 namespace Plumsail.Interview.Handlers.SubmissionHandlers;
 
 public sealed record SubmissionGetPreSignRequest(Guid FileId) : IRequest<OperationResult<string>>;

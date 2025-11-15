@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { FileRecord, FileSubmission, SubmissionResponse } from '../submissions.types';
+import type { FileRecord } from '../../Submissions/submissions.types';
 import type { Pagination, OperationResult } from '../../types/api';
 
 const API_BASE_URL = 'https://localhost:7274/api';
@@ -11,7 +11,7 @@ const apiClient = axios.create({
   },
 });
 
-export const submissionApi = {
+export const signupApi = {
   async getSubmissions(offset?: number, limit?: number): Promise<OperationResult<Pagination<FileRecord>>> {
     const params = new URLSearchParams();
     if (offset !== undefined) params.append('offset', offset.toString());
@@ -35,32 +35,8 @@ export const submissionApi = {
     return response.data;
   },
 
-  async submitFiles(files: FileSubmission[]): Promise<OperationResult<SubmissionResponse>> {
-    const formData = new FormData();
-    
-    files.forEach((fileSubmission, index) => {
-      formData.append(`files[${index}].File`, fileSubmission.file);
-      if (fileSubmission.description) {
-        formData.append(`files[${index}].Description`, fileSubmission.description);
-      }
-      if (fileSubmission.payload) {
-        formData.append(`files[${index}].Payload`, fileSubmission.payload);
-      }
-      if (fileSubmission.status) {
-        formData.append(`files[${index}].Status`, fileSubmission.status);
-      }
-      if (fileSubmission.priority) {
-        formData.append(`files[${index}].Priority`, fileSubmission.priority);
-      }
-      if (fileSubmission.isPublic !== undefined) {
-        formData.append(`files[${index}].IsPublic`, fileSubmission.isPublic.toString());
-      }
-      if (fileSubmission.createdDate) {
-        formData.append(`files[${index}].CreatedDate`, fileSubmission.createdDate.toISOString());
-      }
-    });
-
-    const response = await apiClient.put<OperationResult<SubmissionResponse>>(
+  async submitSignUpForm(formData: FormData): Promise<OperationResult<{ [key: string]: string }>> {
+    const response = await apiClient.put<OperationResult<{ [key: string]: string }>>(
       '/submission',
       formData,
       {

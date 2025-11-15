@@ -28,6 +28,8 @@ var app = builder.Build();
 
 await app.EnsureDatabaseCreatedAsync();
 
+app.UseExceptionHandling();
+
 app.UseSwaggerWithUI();
 
 app.UseCorsPolicy();

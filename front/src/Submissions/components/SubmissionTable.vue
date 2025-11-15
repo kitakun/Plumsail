@@ -34,9 +34,9 @@
         </thead>
         <tbody>
           <tr v-for="item in submissions" :key="item.id">
-            <td>{{ item.name }}</td>
-            <td>{{ formatFileSize(item.size) }}</td>
-            <td>{{ item.type }}</td>
+            <td>{{ item.fileData.name }}</td>
+            <td>{{ formatFileSize(item.fileData.size) }}</td>
+            <td>{{ item.fileData.type }}</td>
             <td class="id-cell">{{ item.id }}</td>
             <td>
               <button 
@@ -98,6 +98,24 @@ let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const totalPages = computed(() => Math.ceil(totalCount.value / pageSize));
 
+const isValidFileSubmission = (fileRecord: FileRecord): boolean => {
+  try {
+    if (!fileRecord.fileData) return false;
+    
+    const fileName = fileRecord.fileData.name;
+    if (!fileName || fileName.trim() === '') return false;
+    
+    if (fileName.startsWith('form-data-')) return false;
+
+    const payload = fileRecord.payload;
+    if (typeof payload !== 'object' || payload === null) return false;
+
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const loadSubmissions = async () => {
   loading.value = true;
   error.value = null;
@@ -105,7 +123,9 @@ const loadSubmissions = async () => {
     const offset = (currentPage.value - 1) * pageSize;
     const response = await submissionApi.getSubmissions(offset, pageSize);
     if (response.isSuccess && response.result) {
-      submissions.value = response.result.items;
+      const filteredSubmissions = response.result.items
+        .filter(isValidFileSubmission);
+      submissions.value = filteredSubmissions;
       totalCount.value = response.result.totalCount;
     } else {
       error.value = response.exception || 'Failed to load submissions';
@@ -132,7 +152,9 @@ const handleSearch = () => {
         const offset = (currentPage.value - 1) * pageSize;
         const response = await submissionApi.searchSubmissions(searchTerm.value.trim(), offset, pageSize);
         if (response.isSuccess && response.result) {
-          submissions.value = response.result.items;
+          const filteredSubmissions = response.result.items
+            .filter(isValidFileSubmission);
+          submissions.value = filteredSubmissions;
           totalCount.value = response.result.totalCount;
         } else {
           error.value = response.exception || 'Failed to search submissions';
@@ -181,7 +203,9 @@ const goToPage = async (page: number) => {
       const offset = (currentPage.value - 1) * pageSize;
       const response = await submissionApi.searchSubmissions(searchTerm.value.trim(), offset, pageSize);
       if (response.isSuccess && response.result) {
-        submissions.value = response.result.items;
+        const filteredSubmissions = response.result.items
+          .filter(isValidFileSubmission);
+        submissions.value = filteredSubmissions;
         totalCount.value = response.result.totalCount;
       } else {
         error.value = response.exception || 'Failed to search submissions';

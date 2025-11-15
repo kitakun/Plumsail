@@ -1,8 +1,5 @@
 <template>
   <div class="app">
-    <header>
-      <h1>File Submissions</h1>
-    </header>
     <main>
       <SubmissionTable />
     </main>

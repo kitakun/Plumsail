@@ -10,7 +10,7 @@ namespace Plumsail.Interview.Handlers.FormReader;
 /// </summary>
 public sealed class FileUploadFormReader : FileWithPropertiesFormReader<FileUploadData>
 {
-    protected override void SetProperty(ref FileUploadData form, string propertyName, string value)
+    protected override void SetProperty(ref FileUploadData form, string propertyName, string value, int? arrayIndex)
     {
         switch (propertyName)
         {
@@ -45,10 +45,35 @@ public sealed class FileUploadFormReader : FileWithPropertiesFormReader<FileUplo
                 }
 
                 break;
-
-            // TODO just log it
-            // default:
-            //     throw new NotImplementedException($"Unknown property {propertyName}");
+            case "File":
+                break;
+            default:
+                var payload = form.Payload ?? new Dictionary<string, object>();
+                
+                if (arrayIndex.HasValue)
+                {
+                    // Handle array properties like Tags[0], Tags[1], etc.
+                    if (!payload.TryGetValue(propertyName, out var existingValue) || existingValue is not List<object> list)
+                    {
+                        list = new List<object>();
+                        payload[propertyName] = list;
+                    }
+                    
+                    // Ensure list is large enough
+                    while (list.Count <= arrayIndex.Value)
+                    {
+                        list.Add(null!);
+                    }
+                    
+                    list[arrayIndex.Value] = value;
+                }
+                else
+                {
+                    payload[propertyName] = value;
+                }
+                
+                form = form with { Payload = payload };
+                break;
         }
     }
 
@@ -66,10 +91,5 @@ public sealed class FileUploadFormReader : FileWithPropertiesFormReader<FileUplo
             Size = size,
             Stream = stream
         };
-    }
-
-    protected override bool HasValidFileData(FileUploadData record)
-    {
-        return !string.IsNullOrEmpty(record.FileName) && record.Stream != null;
     }
 }

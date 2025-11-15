@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 
+using Plumsail.Interview.Domain.Entities;
 using Plumsail.Interview.Domain.Models;
 using Plumsail.Interview.Domain.Providers;
 
@@ -23,7 +24,7 @@ public class MemoryFileStorageProvider : IFileStorageProvider
         var invalidRecord = fileRecordsList.FirstOrDefault(fileRecord => fileRecord.Id == default);
         if (invalidRecord != null)
         {
-            throw new ArgumentException($"File ID cannot be default (empty GUID) for file: {invalidRecord.Name}", nameof(fileRecords));
+            throw new ArgumentException($"File ID cannot be default (empty GUID) for file: {invalidRecord.FileData.Name}", nameof(fileRecords));
         }
 
         await Parallel.ForEachAsync(fileRecordsList, new ParallelOptions
@@ -77,9 +78,8 @@ public class MemoryFileStorageProvider : IFileStorageProvider
         var fileRecord = new FileRecord
         {
             Id = fileId,
-            Name = string.Empty,
-            Size = content.Length,
-            Type = string.Empty,
+            FileData = new FileData(string.Empty, content.Length, string.Empty),
+            Payload = default,
             Stream = new MemoryStream(content)
         };
 

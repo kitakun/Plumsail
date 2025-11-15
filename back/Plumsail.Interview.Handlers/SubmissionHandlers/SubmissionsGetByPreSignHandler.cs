@@ -37,9 +37,8 @@ public sealed class SubmissionGetByPreSignHandler(
 
             var result = fileRecord with
             {
-                Name = submission.Name,
-                Size = submission.Size,
-                Type = submission.Type,
+                FileData = submission.FileData ?? fileRecord.FileData,
+                Payload = submission.Payload
             };
 
             return OperationResult<FileRecord>.Success(result);

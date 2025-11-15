@@ -2,7 +2,7 @@
   <Modal title="File Preview" @close="close">
     <div class="preview-section">
       <div v-if="isImage" class="image-preview">
-        <img v-if="!imageError" :src="file.preSign" :alt="file.name" @error="handleImageError" />
+        <img v-if="!imageError" :src="file.preSign" :alt="file.fileData.name" @error="handleImageError" />
         <div v-else class="image-error">
           <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -19,7 +19,7 @@
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        <p class="file-type">{{ file.type || 'Unknown' }}</p>
+        <p class="file-type">{{ file.fileData.type || 'Unknown' }}</p>
       </div>
     </div>
 
@@ -28,17 +28,17 @@
       <div class="properties-grid">
         <div class="property-item">
           <label>Name</label>
-          <div class="property-value">{{ file.name }}</div>
+          <div class="property-value">{{ file.fileData.name }}</div>
         </div>
 
         <div class="property-item">
           <label>Size</label>
-          <div class="property-value">{{ formatFileSize(file.size) }}</div>
+          <div class="property-value">{{ formatFileSize(file.fileData.size) }}</div>
         </div>
 
         <div class="property-item">
           <label>Type</label>
-          <div class="property-value">{{ file.type }}</div>
+          <div class="property-value">{{ file.fileData.type }}</div>
         </div>
 
         <div class="property-item">
@@ -46,35 +46,35 @@
           <div class="property-value id-value">{{ file.id }}</div>
         </div>
 
-        <div v-if="file.description" class="property-item full-width">
+        <div v-if="file.payload.Description" class="property-item full-width">
           <label>Description</label>
-          <div class="property-value">{{ file.description }}</div>
+          <div class="property-value">{{ file.payload.Description }}</div>
         </div>
 
-        <div v-if="file.status" class="property-item">
+        <div v-if="file.payload.Status" class="property-item">
           <label>Status</label>
-          <div class="property-value status-badge" :class="getStatusClass(file.status)">
-            {{ getStatusLabel(file.status) }}
+          <div class="property-value status-badge" :class="getStatusClass(file.payload.Status)">
+            {{ getStatusLabel(file.payload.Status) }}
           </div>
         </div>
 
-        <div v-if="file.priority" class="property-item">
+        <div v-if="file.payload.Priority" class="property-item">
           <label>Priority</label>
-          <div class="property-value priority-badge" :class="getPriorityClass(file.priority)">
-            {{ getPriorityLabel(file.priority) }}
+          <div class="property-value priority-badge" :class="getPriorityClass(file.payload.Priority)">
+            {{ getPriorityLabel(file.payload.Priority) }}
           </div>
         </div>
 
-        <div v-if="file.createdDate" class="property-item">
+        <div v-if="file.payload.CreatedDate" class="property-item">
           <label>Created Date</label>
-          <div class="property-value">{{ formatDate(file.createdDate) }}</div>
+          <div class="property-value">{{ formatDate(file.payload.CreatedDate) }}</div>
         </div>
 
-        <div v-if="file.isPublic !== undefined" class="property-item">
+        <div v-if="file.payload.IsPublic !== undefined" class="property-item">
           <label>Is Public</label>
           <div class="property-value">
-            <span :class="file.isPublic ? 'public-badge' : 'private-badge'">
-              {{ file.isPublic ? 'Yes' : 'No' }}
+            <span :class="file.payload.IsPublic ? 'public-badge' : 'private-badge'">
+              {{ file.payload.IsPublic ? 'Yes' : 'No' }}
             </span>
           </div>
         </div>
@@ -107,8 +107,8 @@ const emit = defineEmits<{
 const imageError = ref(false);
 
 const isImage = computed(() => {
-  if (!props.file.type) return false;
-  return props.file.type.startsWith('image/');
+  if (!props.file.fileData.type) return false;
+  return props.file.fileData.type.startsWith('image/');
 });
 
 const handleImageError = () => {

@@ -7,8 +7,11 @@ public record OperationResult<T>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public T? Result { get; init; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonIgnore]
     public Exception? Exception { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Error => Exception?.Message;
 
     public bool IsSuccess => Exception == null;
 

@@ -25,9 +25,9 @@
         </div>
 
         <div class="form-group">
-          <label>Unknown Property</label>
+          <label>Payload</label>
           <input
-            v-model="file.unknownProperty"
+            v-model="file.payload"
             type="text"
             placeholder="Enter value to add not existing data to the model..."
             class="form-input"
@@ -146,7 +146,7 @@ const addFiles = (newFiles: File[]) => {
   const fileSubmissions: FileSubmission[] = newFiles.map(file => ({
     file,
     description: '',
-    unknownProperty: '',
+    payload: '',
     status: undefined,
     priority: undefined,
     isPublic: false,

@@ -120,6 +120,6 @@ public class SubmissionController(IMediator mediator) : ControllerBase
             return NotFound("File stream not found");
         }
 
-        return File(response.Result.Stream, response.Result.Type, response.Result.Name);
+        return File(response.Result.Stream, response.Result.FileData.Type, response.Result.FileData.Name);
     }
 }
