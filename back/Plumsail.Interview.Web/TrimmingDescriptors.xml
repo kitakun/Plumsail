@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<linker>
+  <assembly fullname="Plumsail.Interview.Web" preserve="all"/>
+  <assembly fullname="Plumsail.Interview.Handlers" preserve="all"/>
+  <assembly fullname="Plumsail.Interview.Domain" preserve="all"/>
+  <assembly fullname="Plumsail.Interview.DatabaseContext" preserve="all"/>
+  <assembly fullname="Plumsail.Interview.LiteMemoryDatabase" preserve="all"/>
+  <assembly fullname="Plumsail.Interview.MemoryFileStorage" preserve="all"/>
+    
+  <!-- Preserve controller types and return types -->
+  <type fullname="Plumsail.Interview.Web.Controllers.SubmissionController" preserve="all"/>
+  <type fullname="Plumsail.Interview.Domain.Models.OperationResult`1" preserve="all"/>
+  <type fullname="Plumsail.Interview.Domain.Models.Pagination`1" preserve="all"/>
+  <type fullname="Plumsail.Interview.Domain.Models.FileRecord" preserve="all"/>
+</linker>

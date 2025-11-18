@@ -1,9 +1,7 @@
 using Mediator;
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-
-using Plumsail.Interview.DatabaseContext;
+using Plumsail.Interview.DatabaseContext.Services;
 using Plumsail.Interview.Domain.Models;
 
 namespace Plumsail.Interview.Handlers.SubmissionHandlers;
@@ -11,16 +9,14 @@ namespace Plumsail.Interview.Handlers.SubmissionHandlers;
 public sealed record SubmissionGetPreSignRequest(Guid FileId) : IRequest<OperationResult<string>>;
 
 public sealed class SubmissionGetPreSignHandler(
-    PlumsailDbContext dbContext,
+    ISubmissionDataService submissionDataService,
     IHttpContextAccessor httpContextAccessor) : IRequestHandler<SubmissionGetPreSignRequest, OperationResult<string>>
 {
     public async ValueTask<OperationResult<string>> Handle(SubmissionGetPreSignRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var submissionExists = await dbContext.Submissions
-                .AsNoTracking()
-                .AnyAsync(s => s.Id == request.FileId, cancellationToken);
+            var submissionExists = await submissionDataService.ExistsAsync(request.FileId, cancellationToken);
 
             if (!submissionExists)
             {

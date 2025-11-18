@@ -8,4 +8,3 @@ export type OperationResult<T> = {
   isSuccess: boolean;
   exception?: string;
 };
-

@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Plumsail.Interview.Handlers.SubmissionHandlers;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace Plumsail.Interview.Web.Extensions;
 
@@ -37,5 +40,29 @@ public static class FormExtensions
             options.MaxRequestBodySize = maxRequestSizeBytes;
             options.AllowSynchronousIO = false;
         });
+    }
+
+    public static async IAsyncEnumerable<FileUploadData> CreateSingleJsonObjectAsyncEnumerator(Stream body, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        using var streamReader = new StreamReader(body, System.Text.Encoding.UTF8, leaveOpen: false);
+        var jsonContent = await streamReader.ReadToEndAsync(cancellationToken);
+        
+        var jsonDocument = JsonDocument.Parse(jsonContent);
+        var payload = new Dictionary<string, JsonElement>();
+        
+        foreach (var property in jsonDocument.RootElement.EnumerateObject())
+        {
+            payload[property.Name] = property.Value.Clone();
+        }
+
+        var jsonFileUploadData = new FileUploadData(
+            FileName: string.Empty,
+            Size: 0,
+            ContentType: "application/json",
+            Stream: Stream.Null,
+            Payload: payload
+        );
+
+        yield return jsonFileUploadData;
     }
 }

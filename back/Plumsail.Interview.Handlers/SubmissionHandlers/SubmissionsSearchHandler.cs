@@ -1,9 +1,8 @@
 using Mediator;
+
 using System.Text.Json;
 
-using Microsoft.EntityFrameworkCore;
-
-using Plumsail.Interview.DatabaseContext;
+using Plumsail.Interview.DatabaseContext.Services;
 using Plumsail.Interview.Domain.Entities;
 using Plumsail.Interview.Domain.Models;
 
@@ -15,8 +14,9 @@ public sealed record SubmissionsSearchRequest(
     int? Limit = null) : IRequest<OperationResult<Pagination<FileRecord>>>;
 
 public sealed class SubmissionsSearchHandler(
-    PlumsailDbContext dbContext,
-    IMediator mediator) : IRequestHandler<SubmissionsSearchRequest, OperationResult<Pagination<FileRecord>>>
+    ISubmissionDataService submissionDataService,
+    IMediator mediator)
+    : IRequestHandler<SubmissionsSearchRequest, OperationResult<Pagination<FileRecord>>>
 {
     private static FileRecord MapToFileRecord(SubmissionEntity entity)
     {
@@ -38,15 +38,13 @@ public sealed class SubmissionsSearchHandler(
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var searchTerm = request.SearchTerm.Trim().ToLower();
-                var allSubmissions = await dbContext.Submissions
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken);
-                
+                var allSubmissions = await submissionDataService.GetAllAsync(cancellationToken);
+
                 submissions = allSubmissions
                     .Where(s =>
                         (s.FileData.HasValue && s.FileData.Value.Name.ToLower().Contains(searchTerm)) ||
-                        (s.Payload.ValueKind != JsonValueKind.Undefined && 
-                         s.Payload.TryGetProperty("Description", out var desc) && 
+                        (s.Payload.ValueKind != JsonValueKind.Undefined &&
+                         s.Payload.TryGetProperty("Description", out var desc) &&
                          desc.ValueKind == JsonValueKind.String &&
                          desc.GetString() != null &&
                          desc.GetString()!.ToLower().Contains(searchTerm)))
@@ -60,7 +58,7 @@ public sealed class SubmissionsSearchHandler(
                     })
                     .ThenBy(s => s.Id)
                     .ToList();
-                
+
                 totalCount = submissions.Count;
                 submissions = submissions
                     .Skip(request.Offset ?? 0)
@@ -69,10 +67,8 @@ public sealed class SubmissionsSearchHandler(
             }
             else
             {
-                var allSubmissions = await dbContext.Submissions
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken);
-                
+                var allSubmissions = await submissionDataService.GetAllAsync(cancellationToken);
+
                 totalCount = allSubmissions.Count;
                 submissions = allSubmissions
                     .OrderBy(s =>
@@ -93,6 +89,11 @@ public sealed class SubmissionsSearchHandler(
 
             var preSignTasks = fileRecords.Select(async fileRecord =>
             {
+                if (fileRecord.FileData.Size == 0)
+                {
+                    return new { FileRecord = fileRecord, PreSignUrl = (string?)null };
+                }
+
                 var preSignRequest = new SubmissionGetPreSignRequest(fileRecord.Id);
                 var preSignResponse = await mediator.Send(preSignRequest, cancellationToken);
                 return new { FileRecord = fileRecord, PreSignUrl = preSignResponse.IsSuccess ? preSignResponse.Result : null };

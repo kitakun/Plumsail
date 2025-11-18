@@ -51,7 +51,7 @@ export const AVAILABLE_TAGS = [
   'Fitness',
 ] as const;
 
-export type AvailableTag = typeof AVAILABLE_TAGS[number];
+export type AvailableTag = (typeof AVAILABLE_TAGS)[number];
 
 export type SignUpRecord = {
   id: string;
@@ -69,4 +69,3 @@ export type SignUpFormData = {
   gender: 'Male' | 'Female' | 'Other' | 'Prefer not to say';
   tags: AvailableTag[];
 };
-

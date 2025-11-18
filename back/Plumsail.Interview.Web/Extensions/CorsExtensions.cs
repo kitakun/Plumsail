@@ -2,7 +2,7 @@ namespace Plumsail.Interview.Web.Extensions;
 
 public static class CorsExtensions
 {
-    public static IServiceCollection AddCorsPolicy(this IServiceCollection services)
+    public static void AddCorsPolicy(this IServiceCollection services)
     {
         services.AddCors(options =>
         {
@@ -13,13 +13,10 @@ public static class CorsExtensions
                     .AllowAnyHeader();
             });
         });
-
-        return services;
     }
 
-    public static IApplicationBuilder UseCorsPolicy(this IApplicationBuilder app)
+    public static void UseCorsPolicy(this IApplicationBuilder app)
     {
         app.UseCors();
-        return app;
     }
 }

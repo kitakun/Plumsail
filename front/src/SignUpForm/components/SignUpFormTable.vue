@@ -11,7 +11,18 @@
         />
       </div>
       <button class="submit-button" @click="openModal">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="plus-icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="plus-icon"
+        >
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
@@ -41,23 +52,14 @@
             <td>{{ item.gender }}</td>
             <td>
               <div class="tags-cell">
-                <span
-                  v-for="(tag, index) in item.tags"
-                  :key="index"
-                  class="tag-badge-small"
-                >
+                <span v-for="(tag, index) in item.tags" :key="index" class="tag-badge-small">
                   {{ tag }}
                 </span>
                 <span v-if="item.tags.length === 0" class="no-tags">No tags</span>
               </div>
             </td>
             <td>
-              <button 
-                class="preview-button" 
-                @click="handlePreview(item)"
-              >
-                Preview
-              </button>
+              <button class="preview-button" @click="handlePreview(item)">Preview</button>
             </td>
           </tr>
           <tr v-if="filteredRecords.length === 0">
@@ -76,17 +78,9 @@
       />
     </div>
 
-    <SignUpFormModal
-      v-if="showModal"
-      @close="closeModal"
-      @submit="handleSubmit"
-    />
+    <SignUpFormModal v-if="showModal" @close="closeModal" @submit="handleSubmit" />
 
-    <SignUpFormPreviewModal
-      v-if="previewRecord"
-      :record="previewRecord"
-      @close="closePreview"
-    />
+    <SignUpFormPreviewModal v-if="previewRecord" :record="previewRecord" @close="closePreview" />
   </div>
 </template>
 
@@ -120,21 +114,25 @@ const filteredRecords = computed(() => {
 const mapFileRecordToSignUpRecord = (fileRecord: FileRecord): SignUpRecord | null => {
   try {
     const payload = fileRecord.payload;
-    
+
     if (typeof payload !== 'object' || payload === null) return null;
 
-    const hasNonSignUpFields = 
-      'Description' in payload || 
-      'Status' in payload || 
-      'Priority' in payload || 
+    const hasNonSignUpFields =
+      'Description' in payload ||
+      'Status' in payload ||
+      'Priority' in payload ||
       'IsPublic' in payload ||
       'File' in payload ||
       'FileName' in payload;
-    
+
     if (hasNonSignUpFields) return null;
 
-    if (!('FirstName' in payload) || !('LastName' in payload) || 
-        !('BirthDate' in payload) || !('Gender' in payload)) {
+    if (
+      !('FirstName' in payload) ||
+      !('LastName' in payload) ||
+      !('BirthDate' in payload) ||
+      !('Gender' in payload)
+    ) {
       return null;
     }
 
@@ -154,17 +152,16 @@ const mapFileRecordToSignUpRecord = (fileRecord: FileRecord): SignUpRecord | nul
 
     const gender = payload.Gender;
     const validGenders = ['Male', 'Female', 'Other', 'Prefer not to say'] as const;
-    if (typeof gender !== 'string' || !(validGenders as readonly string[]).includes(gender)) return null;
+    if (typeof gender !== 'string' || !(validGenders as readonly string[]).includes(gender))
+      return null;
 
     let tags: AvailableTag[] = [];
     if ('Tags' in payload && payload.Tags !== null && payload.Tags !== undefined) {
       if (Array.isArray(payload.Tags)) {
         // Filter to only include valid AvailableTag values
-        tags = payload.Tags
-          .filter((tag): tag is string => typeof tag === 'string')
-          .filter((tag): tag is AvailableTag => 
-            AVAILABLE_TAGS.includes(tag as AvailableTag)
-          );
+        tags = payload.Tags.filter((tag): tag is string => typeof tag === 'string').filter(
+          (tag): tag is AvailableTag => AVAILABLE_TAGS.includes(tag as AvailableTag)
+        );
       }
     }
 
@@ -208,7 +205,7 @@ const handleSearch = () => {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
   }
-  
+
   searchTimeout = setTimeout(async () => {
     currentPage.value = 1;
     if (searchTerm.value.trim()) {
@@ -216,7 +213,11 @@ const handleSearch = () => {
       error.value = null;
       try {
         const offset = (currentPage.value - 1) * pageSize;
-        const response = await signupApi.searchSubmissions(searchTerm.value.trim(), offset, pageSize);
+        const response = await signupApi.searchSubmissions(
+          searchTerm.value.trim(),
+          offset,
+          pageSize
+        );
         if (response.isSuccess && response.result) {
           const mappedRecords = response.result.items
             .map(mapFileRecordToSignUpRecord)
@@ -260,13 +261,13 @@ const handleSubmit = async (data: SignUpFormData) => {
   error.value = null;
   try {
     const formData = new FormData();
-    
+
     // Add form fields directly
     formData.append('[0].FirstName', data.firstName);
     formData.append('[0].LastName', data.lastName);
     formData.append('[0].BirthDate', data.birthDate);
     formData.append('[0].Gender', data.gender);
-    
+
     // Add tags as array
     data.tags.forEach((tag, index) => {
       formData.append(`[0].Tags[${index}]`, tag);
@@ -516,4 +517,3 @@ onMounted(() => {
   }
 }
 </style>
-

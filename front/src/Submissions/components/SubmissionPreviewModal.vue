@@ -2,9 +2,24 @@
   <Modal title="File Preview" @close="close">
     <div class="preview-section">
       <div v-if="isImage" class="image-preview">
-        <img v-if="!imageError" :src="file.preSign" :alt="file.fileData.name" @error="handleImageError" />
+        <img
+          v-if="!imageError"
+          :src="file.preSign"
+          :alt="file.fileData.name"
+          @error="handleImageError"
+        />
         <div v-else class="image-error">
-          <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="120"
+            height="120"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#ef4444"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -12,7 +27,17 @@
         </div>
       </div>
       <div v-else class="file-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="120"
+          height="120"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
           <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -60,7 +85,10 @@
 
         <div v-if="file.payload.Priority" class="property-item">
           <label>Priority</label>
-          <div class="property-value priority-badge" :class="getPriorityClass(file.payload.Priority)">
+          <div
+            class="property-value priority-badge"
+            :class="getPriorityClass(file.payload.Priority)"
+          >
             {{ getPriorityLabel(file.payload.Priority) }}
           </div>
         </div>
@@ -83,9 +111,7 @@
 
     <template #footer>
       <button class="close-button-footer" @click="close">Close</button>
-      <button v-if="file.preSign" class="open-button" @click="openInNewTab">
-        Open in New Tab
-      </button>
+      <button v-if="file.preSign" class="open-button" @click="openInNewTab">Open in New Tab</button>
     </template>
   </Modal>
 </template>
@@ -120,7 +146,7 @@ const formatFileSize = (bytes: number): string => {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 };
 
 const formatDate = (dateString: string): string => {
@@ -134,20 +160,20 @@ const formatDate = (dateString: string): string => {
 
 const getStatusClass = (status: string): string => {
   const statusMap: Record<string, string> = {
-    'Pending': 'status-pending',
-    'InReview': 'status-inreview',
-    'Approved': 'status-approved',
-    'Rejected': 'status-rejected'
+    Pending: 'status-pending',
+    InReview: 'status-inreview',
+    Approved: 'status-approved',
+    Rejected: 'status-rejected',
   };
   return statusMap[status] || '';
 };
 
 const getPriorityClass = (priority: string): string => {
   const priorityMap: Record<string, string> = {
-    'Low': 'priority-low',
-    'Medium': 'priority-medium',
-    'High': 'priority-high',
-    'Critical': 'priority-critical'
+    Low: 'priority-low',
+    Medium: 'priority-medium',
+    High: 'priority-high',
+    Critical: 'priority-critical',
   };
   return priorityMap[priority] || '';
 };
@@ -393,4 +419,3 @@ const openInNewTab = () => {
   }
 }
 </style>
-

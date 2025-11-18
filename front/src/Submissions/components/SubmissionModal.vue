@@ -1,6 +1,6 @@
 <template>
-  <Modal 
-    title="Submit Files" 
+  <Modal
+    title="Submit Files"
     :close-button-disabled="submitting"
     :prevent-overlay-close="submitting"
     max-width="800px"
@@ -9,7 +9,9 @@
     <div v-for="(file, index) in files" :key="index" class="file-item">
       <div class="file-header">
         <span class="file-name">{{ file.file.name }}</span>
-        <button class="remove-button" @click="removeFile(index)" :disabled="submitting">Remove</button>
+        <button class="remove-button" @click="removeFile(index)" :disabled="submitting">
+          Remove
+        </button>
       </div>
 
       <div class="file-properties">
@@ -73,7 +75,13 @@
       </div>
     </div>
 
-    <div class="file-upload-area" :class="{ 'disabled': submitting }" @click="triggerFileInput" @dragover.prevent @drop.prevent="handleDrop">
+    <div
+      class="file-upload-area"
+      :class="{ disabled: submitting }"
+      @click="triggerFileInput"
+      @dragover.prevent
+      @drop.prevent="handleDrop"
+    >
       <input
         ref="fileInput"
         type="file"
@@ -93,11 +101,7 @@
 
     <template #footer>
       <button class="cancel-button" @click="close" :disabled="submitting">Cancel</button>
-      <button
-        class="submit-button"
-        @click="submit"
-        :disabled="files.length === 0 || submitting"
-      >
+      <button class="submit-button" @click="submit" :disabled="files.length === 0 || submitting">
         {{ submitting ? 'Submitting...' : 'Submit' }}
       </button>
     </template>
@@ -304,7 +308,9 @@ label {
   padding: 2rem;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.3s, background-color 0.3s;
+  transition:
+    border-color 0.3s,
+    background-color 0.3s;
   margin-top: 1rem;
   background-color: #2a2a2a;
 }
@@ -461,4 +467,3 @@ label {
   }
 }
 </style>
-

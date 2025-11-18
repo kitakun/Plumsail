@@ -3,6 +3,7 @@
     <HeaderNavigation :current-path="currentPath" @navigate="handleNavigate" />
     <SubmissionsPage v-if="currentPath === '/submissions'" />
     <SignUpFormPage v-else-if="currentPath === '/signup'" />
+    <MessangerPage v-else-if="currentPath === '/messanger'" />
   </div>
 </template>
 
@@ -11,6 +12,7 @@ import { ref } from 'vue';
 import HeaderNavigation from './shared/HeaderNavigation.vue';
 import SubmissionsPage from './Submissions/Submissions.Page.vue';
 import SignUpFormPage from './SignUpForm/SignUpForm.Page.vue';
+import MessangerPage from './Messanger/Messanger.Page.vue';
 
 const currentPath = ref('/submissions');
 
@@ -26,4 +28,3 @@ const handleNavigate = (path: string) => {
   flex-direction: column;
 }
 </style>
-

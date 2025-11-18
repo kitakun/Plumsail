@@ -9,4 +9,3 @@ public static class ExceptionHandlingExtensions
         return app.UseMiddleware<ExceptionHandlingMiddleware>();
     }
 }
-

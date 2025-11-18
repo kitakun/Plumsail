@@ -1,22 +1,29 @@
-using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
+using Plumsail.Interview.DatabaseContext;
+using Plumsail.Interview.Handlers;
 using Plumsail.Interview.Handlers.SubmissionHandlers;
-using Plumsail.Interview.MemoryDatabase;
+using Plumsail.Interview.LiteMemoryDatabase;
+using Plumsail.Interview.Web.Bindings;
+using Plumsail.Interview.Web.Controllers;
 using Plumsail.Interview.Web.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+AotKeepTypes.EnsureTypesArePreserved();
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
-builder.Services.AddEndpointsApiExplorer();
+var builder = WebApplication.CreateSlimBuilder(args);
 
-builder.Services.ConfigureFormLimits(builder.Configuration);
+builder.Services.ConfigureHttpJsonOptions(opts =>
+{
+    opts.SerializerOptions.TypeInfoResolver = JsonTypeInfoResolver.Combine(
+        AppJsonSerializerContext.Default,
+        HandlersJsonSerializerContext.Default);
+});
 
 builder.Services.AddPlumsailDependencies();
-builder.Services.AddInMemoryDatabase();
+builder.Services.AddLiteMemoryDatabase();
 
 builder.Services.AddCorsPolicy();
-builder.Services.AddSwagger();
+builder.Services.AddScalar();
 
 builder.Services.AddMediator(options =>
 {
@@ -30,12 +37,12 @@ await app.EnsureDatabaseCreatedAsync();
 
 app.UseExceptionHandling();
 
-app.UseSwaggerWithUI();
+app.UseHttpsRedirection();
 
 app.UseCorsPolicy();
 
-app.UseHttpsRedirection();
+app.MapSubmissionEndpoints();
 
-app.MapControllers();
+app.UseScalar();
 
 await app.RunAsync();

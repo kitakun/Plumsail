@@ -4,7 +4,7 @@ using Plumsail.Interview.Domain.Entities;
 
 namespace Plumsail.Interview.Domain.Models;
 
-public record FileRecord : ISubmission
+public record FileRecord
 {
     public Guid Id { get; init; }
     

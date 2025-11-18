@@ -5,10 +5,10 @@ import type { SubmissionStatus, PriorityLevel } from '../submissions.types';
  */
 export const getStatusLabel = (status: SubmissionStatus): string => {
   const statusMap: Record<SubmissionStatus, string> = {
-    'Pending': 'Pending',
-    'InReview': 'In Review',
-    'Approved': 'Approved',
-    'Rejected': 'Rejected'
+    Pending: 'Pending',
+    InReview: 'In Review',
+    Approved: 'Approved',
+    Rejected: 'Rejected',
   };
   return statusMap[status] || status;
 };
@@ -18,11 +18,10 @@ export const getStatusLabel = (status: SubmissionStatus): string => {
  */
 export const getPriorityLabel = (priority: PriorityLevel): string => {
   const priorityMap: Record<PriorityLevel, string> = {
-    'Low': 'Low',
-    'Medium': 'Medium',
-    'High': 'High',
-    'Critical': 'Critical'
+    Low: 'Low',
+    Medium: 'Medium',
+    High: 'High',
+    Critical: 'Critical',
   };
   return priorityMap[priority] || priority;
 };
-

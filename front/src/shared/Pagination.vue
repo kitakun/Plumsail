@@ -1,20 +1,28 @@
 <template>
   <div class="pagination">
-    <div class="pagination-info">
-      Showing {{ itemsCount }} of {{ totalCount }} submissions
-    </div>
+    <div class="pagination-info">Showing {{ itemsCount }} of {{ totalCount }} submissions</div>
     <div class="pagination-controls">
-      <button 
-        class="pagination-button" 
+      <button
+        class="pagination-button"
         @click="$emit('previous')"
         :disabled="currentPage === 1"
         title="Previous page"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
-      
+
       <button
         v-for="page in visiblePages"
         :key="page"
@@ -24,14 +32,24 @@
       >
         {{ page }}
       </button>
-      
-      <button 
-        class="pagination-button" 
+
+      <button
+        class="pagination-button"
         @click="$emit('next')"
         :disabled="currentPage === totalPages"
         title="Next page"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
@@ -51,8 +69,8 @@ const props = defineProps<{
 
 defineEmits<{
   'page-change': [page: number];
-  'previous': [];
-  'next': [];
+  previous: [];
+  next: [];
 }>();
 
 const visiblePages = computed(() => {
@@ -60,15 +78,15 @@ const visiblePages = computed(() => {
   const maxVisible = 5;
   let start = Math.max(1, props.currentPage - Math.floor(maxVisible / 2));
   let end = Math.min(props.totalPages, start + maxVisible - 1);
-  
+
   if (end - start < maxVisible - 1) {
     start = Math.max(1, end - maxVisible + 1);
   }
-  
+
   for (let i = start; i <= end; i++) {
     pages.push(i);
   }
-  
+
   return pages;
 });
 </script>
@@ -107,7 +125,9 @@ const visiblePages = computed(() => {
   color: rgba(255, 255, 255, 0.87);
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background-color 0.3s, border-color 0.3s;
+  transition:
+    background-color 0.3s,
+    border-color 0.3s;
 }
 
 .pagination-button:hover:not(:disabled) {
@@ -137,4 +157,3 @@ const visiblePages = computed(() => {
   }
 }
 </style>
-

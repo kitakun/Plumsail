@@ -1,8 +1,7 @@
 using Mediator;
 
-using Microsoft.EntityFrameworkCore;
-
-using Plumsail.Interview.DatabaseContext;
+using Plumsail.Interview.DatabaseContext.Services;
+using Plumsail.Interview.Domain.Entities;
 using Plumsail.Interview.Domain.Models;
 using Plumsail.Interview.Domain.Providers;
 
@@ -11,8 +10,9 @@ namespace Plumsail.Interview.Handlers.SubmissionHandlers;
 public sealed record SubmissionGetByPreSignRequest(string Token) : IRequest<OperationResult<FileRecord>>;
 
 public sealed class SubmissionGetByPreSignHandler(
-    PlumsailDbContext dbContext,
-    IFileStorageProvider fileStorageProvider) : IRequestHandler<SubmissionGetByPreSignRequest, OperationResult<FileRecord>>
+    ISubmissionDataService submissionDataService,
+    IFileStorageProvider fileStorageProvider)
+    : IRequestHandler<SubmissionGetByPreSignRequest, OperationResult<FileRecord>>
 {
     public async ValueTask<OperationResult<FileRecord>> Handle(SubmissionGetByPreSignRequest request, CancellationToken cancellationToken)
     {
@@ -24,9 +24,7 @@ public sealed class SubmissionGetByPreSignHandler(
                 return OperationResult<FileRecord>.Fail(new UnauthorizedAccessException("Invalid pre-sign token"));
             }
 
-            var submission = await dbContext.Submissions
-                .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Id == fileId.Value, cancellationToken);
+            var submission = await submissionDataService.GetByIdAsync(fileId.Value, cancellationToken);
 
             if (submission == null)
             {

@@ -1,8 +1,8 @@
 using Mediator;
 
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-using Plumsail.Interview.DatabaseContext;
+using Plumsail.Interview.DatabaseContext.Services;
 using Plumsail.Interview.Domain.Entities;
 using Plumsail.Interview.Domain.Models;
 
@@ -14,34 +14,37 @@ public sealed record SubmissionsGetRequest(
 ) : IRequest<OperationResult<Pagination<FileRecord>>>;
 
 public sealed class SubmissionsGetHandler(
-    PlumsailDbContext dbContext,
-    IMediator mediator
+    ISubmissionDataService submissionDataService,
+    IMediator mediator,
+    ILogger<SubmissionsGetHandler> logger
 ) : IRequestHandler<SubmissionsGetRequest, OperationResult<Pagination<FileRecord>>>
 {
-    private static readonly Func<PlumsailDbContext, int, int, IAsyncEnumerable<FileRecord>> GetSubmissionsCompiled =
-        EF.CompileAsyncQuery((PlumsailDbContext context, int offset, int limit) =>
-            context.Submissions
-                .AsNoTracking()
-                .OrderBy(s => s.Id)
-                .Skip(offset)
-                .Take(limit)
-                .Select(s => new FileRecord
-                {
-                    Id = s.Id,
-                    FileData = s.FileData ?? new FileData(string.Empty, 0, string.Empty),
-                    Payload = s.Payload
-                }));
+    private static FileRecord MapToFileRecord(SubmissionEntity entity)
+    {
+        return new FileRecord
+        {
+            Id = entity.Id,
+            FileData = entity.FileData ?? new FileData(string.Empty, 0, string.Empty),
+            Payload = entity.Payload
+        };
+    }
 
     public async ValueTask<OperationResult<Pagination<FileRecord>>> Handle(SubmissionsGetRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var totalCount = await dbContext.Submissions.CountAsync(cancellationToken);
+            logger.LogInformation("Getting submissions with offset {Offset} and limit {Limit}", request.Offset, request.Limit);
+            var totalCount = await submissionDataService.GetTotalCountAsync(cancellationToken);
+            logger.LogInformation("Total count of submissions: {TotalCount}", totalCount);
 
             var offset = request.Offset ?? 0;
             var limit = request.Limit ?? totalCount;
+            logger.LogInformation("Offset: {Offset}, Limit: {Limit}", offset, limit);
 
-            var fileRecords = await GetSubmissionsCompiled(dbContext, offset, limit).ToListAsync(cancellationToken);
+            var submissions = await submissionDataService.GetPageAsync(offset, limit, cancellationToken);
+            logger.LogInformation("Found {Count} submissions", submissions.Count);
+            var fileRecords = submissions.Select(MapToFileRecord).ToList();
+            logger.LogInformation("Mapped {Count} file records", fileRecords.Count);
 
             List<FileRecord> fileRecordsWithPreSign;
 
@@ -53,25 +56,25 @@ public sealed class SubmissionsGetHandler(
             {
                 var preSignTasks = fileRecords.Select(async fileRecord =>
                 {
+                    if (fileRecord.FileData.Size == 0)
+                    {
+                        return (FileRecord: fileRecord, PreSignUrl: null);
+                    }
+
                     try
                     {
                         var preSignRequest = new SubmissionGetPreSignRequest(fileRecord.Id);
                         var preSignResponse = await mediator.Send(preSignRequest, cancellationToken);
-                        return new
-                        {
-                            FileRecord = fileRecord,
-                            PreSignUrl = preSignResponse.IsSuccess
+                        return (
+                            FileRecord: fileRecord,
+                            PreSignUrl: preSignResponse.IsSuccess
                                 ? preSignResponse.Result
-                                : null
-                        };
+                                : null);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        return new
-                        {
-                            FileRecord = fileRecord,
-                            PreSignUrl = (string?) null
-                        };
+                        logger.LogError(ex, "Failed to get preSign URL for file {FileId}", fileRecord.Id);
+                        return (FileRecord: fileRecord, PreSignUrl: null);
                     }
                 });
 
@@ -95,6 +98,7 @@ public sealed class SubmissionsGetHandler(
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to get submissions with offset {Offset} and limit {Limit}", request.Offset, request.Limit);
             return OperationResult<Pagination<FileRecord>>.Fail(ex);
         }
     }

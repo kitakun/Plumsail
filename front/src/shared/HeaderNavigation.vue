@@ -30,6 +30,7 @@ const emit = defineEmits<{
 const links = [
   { path: '/submissions', label: 'Submissions' },
   { path: '/signup', label: 'Sign Up Form' },
+  { path: '/messanger', label: 'Messanger' },
 ];
 
 const currentPath = ref(props.currentPath || '/submissions');
@@ -111,4 +112,3 @@ onMounted(() => {
   }
 }
 </style>
-

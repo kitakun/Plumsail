@@ -3,11 +3,7 @@
     <div class="modal-content" :style="{ maxWidth: maxWidth }">
       <div class="modal-header">
         <h2>{{ title }}</h2>
-        <button 
-          class="close-button" 
-          @click="handleClose" 
-          :disabled="closeButtonDisabled"
-        >
+        <button class="close-button" @click="handleClose" :disabled="closeButtonDisabled">
           &times;
         </button>
       </div>
@@ -26,16 +22,19 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue';
 
-const props = withDefaults(defineProps<{
-  title: string;
-  closeButtonDisabled?: boolean;
-  maxWidth?: string;
-  preventOverlayClose?: boolean;
-}>(), {
-  closeButtonDisabled: false,
-  maxWidth: '900px',
-  preventOverlayClose: false,
-});
+const props = withDefaults(
+  defineProps<{
+    title: string;
+    closeButtonDisabled?: boolean;
+    maxWidth?: string;
+    preventOverlayClose?: boolean;
+  }>(),
+  {
+    closeButtonDisabled: false,
+    maxWidth: '900px',
+    preventOverlayClose: false,
+  }
+);
 
 const emit = defineEmits<{
   close: [];
@@ -164,4 +163,3 @@ onUnmounted(() => {
   }
 }
 </style>
-

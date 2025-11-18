@@ -13,6 +13,7 @@ public static class PlumsailDependenciesRegistration
         services.AddSingleton<IFileStorageProvider, MemoryFileStorageProvider>();
         services.AddSingleton<IIdentityProvider, GuidIdentityProvider>();
         services.AddSingleton<FileWithPropertiesFormReader<FileUploadData>, FileUploadFormReader>();
+
         services.AddHttpContextAccessor();
     }
 }

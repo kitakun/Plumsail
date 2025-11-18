@@ -16,7 +16,7 @@ namespace Plumsail.Interview.Handlers.FormReader;
 /// <typeparam name="T">POCO object type</typeparam>
 public abstract partial class FileWithPropertiesFormReader<T> where T : new()
 {
-    public async IAsyncEnumerable<T> ReadAsync(
+    public async IAsyncEnumerable<T> CreateAsyncEnumerator(
         Stream body,
         string contentType,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -80,7 +80,7 @@ public abstract partial class FileWithPropertiesFormReader<T> where T : new()
             }
             else
             {
-                // This is a form field (Description, Status, Priority, etc.)
+                // This is a form field
                 using var streamReader = new StreamReader(section.Body, Encoding.UTF8, leaveOpen: false);
                 var value = await streamReader.ReadToEndAsync(cancellationToken);
 
@@ -90,7 +90,6 @@ public abstract partial class FileWithPropertiesFormReader<T> where T : new()
             currentFileRecords[index] = record;
         }
 
-        // Process all collected file records and yield them
         foreach (var entry in currentFileRecords.Select(kvp => kvp.Value))
         {
             yield return entry;

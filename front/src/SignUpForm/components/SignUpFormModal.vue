@@ -1,6 +1,6 @@
 <template>
-  <Modal 
-    title="Sign Up Form" 
+  <Modal
+    title="Sign Up Form"
     :close-button-disabled="submitting"
     :prevent-overlay-close="submitting"
     max-width="600px"
@@ -89,18 +89,9 @@
           </Teleport>
         </div>
         <div v-if="formData.tags.length > 0" class="selected-tags">
-          <span
-            v-for="(tag, index) in formData.tags"
-            :key="index"
-            class="tag-badge"
-          >
+          <span v-for="(tag, index) in formData.tags" :key="index" class="tag-badge">
             {{ tag }}
-            <button
-              type="button"
-              class="tag-remove"
-              @click="removeTag(tag)"
-              :disabled="submitting"
-            >
+            <button type="button" class="tag-remove" @click="removeTag(tag)" :disabled="submitting">
               ×
             </button>
           </span>
@@ -113,11 +104,7 @@
 
     <template #footer>
       <button class="cancel-button" @click="close" :disabled="submitting">Cancel</button>
-      <button
-        class="submit-button"
-        @click="submit"
-        :disabled="!isFormValid || submitting"
-      >
+      <button class="submit-button" @click="submit" :disabled="!isFormValid || submitting">
         {{ submitting ? 'Submitting...' : 'Submit' }}
       </button>
     </template>
@@ -168,14 +155,16 @@ const filteredTags = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return formData.value.firstName.trim() !== '' &&
-         formData.value.lastName.trim() !== '' &&
-         formData.value.birthDate !== '';
+  return (
+    formData.value.firstName.trim() !== '' &&
+    formData.value.lastName.trim() !== '' &&
+    formData.value.birthDate !== ''
+  );
 });
 
 const updateSuggestionsPosition = async () => {
   if (!tagInput.value) return;
-  
+
   await nextTick();
   const rect = tagInput.value.getBoundingClientRect();
   suggestionsStyle.value = {
@@ -524,4 +513,3 @@ label {
   }
 }
 </style>
-

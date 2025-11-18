@@ -178,4 +178,3 @@ const close = () => {
   }
 }
 </style>
-

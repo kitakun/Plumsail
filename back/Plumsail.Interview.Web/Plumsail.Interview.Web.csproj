@@ -1,30 +1,86 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <NoWarn>$(NoWarn);1591</NoWarn>
+        <NoWarn>$(NoWarn);1591;CA2252</NoWarn>
         <SelfContained>true</SelfContained>
+        <PublishSingleFile>true</PublishSingleFile>
+        <EnableDefaultWebConfig>false</EnableDefaultWebConfig>
+        <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+        <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+        <OptimizationPreference>Speed</OptimizationPreference>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <EnableRequestDelegateGenerator>true</EnableRequestDelegateGenerator>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <PublishAot>true</PublishAot>
+        <PublishTrimmed>true</PublishTrimmed>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <PublishAot>true</PublishAot>
+        <PublishTrimmed>true</PublishTrimmed>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Mediator.Abstractions" Version="3.0.0" />
-        <PackageReference Include="Mediator.SourceGenerator" Version="3.0.0">
+        <TrimmerRootAssembly Include="Microsoft.AspNetCore.OpenApi" />
+        <TrimmerRootDescriptor Include="$(MSBuildThisFileDirectory)TrimmingDescriptors.xml" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Mediator.Abstractions" Version="3.0.1" />
+        <PackageReference Include="Mediator.SourceGenerator" Version="3.0.1">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-        <PackageReference Include="System.Linq.Async" Version="6.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Plumsail.Interview.DatabaseContext\Plumsail.Interview.DatabaseContext.csproj" />
       <ProjectReference Include="..\Plumsail.Interview.Handlers\Plumsail.Interview.Handlers.csproj" />
-      <ProjectReference Include="..\Plumsail.Interview.MemoryDatabase\Plumsail.Interview.MemoryDatabase.csproj" />
+      <ProjectReference Include="..\Plumsail.Interview.LiteMemoryDatabase\Plumsail.Interview.LiteMemoryDatabase.csproj" />
       <ProjectReference Include="..\Plumsail.Interview.MemoryFileStorage\Plumsail.Interview.MemoryFileStorage.csproj" />
     </ItemGroup>
+
+
+    <Target Name="RemoveIISFiles" AfterTargets="Publish">
+        <Exec Command="powershell -Command &quot;if (Test-Path '$(PublishDir)web.config') { Remove-Item '$(PublishDir)web.config' -Force }&quot;" ContinueOnError="true" IgnoreExitCode="true" />
+        <Exec Command="powershell -Command &quot;if (Test-Path '$(PublishDir)aspnetcorev2_inprocess.dll') { Remove-Item '$(PublishDir)aspnetcorev2_inprocess.dll' -Force }&quot;" ContinueOnError="true" IgnoreExitCode="true" />
+        <Exec Command="powershell -Command &quot;if (Test-Path '$(PublishDir)aspnetcorev2_outofprocess.dll') { Remove-Item '$(PublishDir)aspnetcorev2_outofprocess.dll' -Force }&quot;" ContinueOnError="true" IgnoreExitCode="true" />
+        <Message Text="Removed IIS-related files from $(PublishDir)" Importance="normal" />
+    </Target>
+
+    <Target Name="RemovePDBFiles" AfterTargets="Publish">
+        <Exec Command="powershell -Command &quot;Get-ChildItem -Path '$(PublishDir)' -Filter '*.pdb' | Remove-Item -Force&quot;" ContinueOnError="true" IgnoreExitCode="true" />
+        <Message Text="Removed PDB files from $(PublishDir)" Importance="normal" />
+    </Target>
+
+    <Target Name="RemoveDevelopmentFiles" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
+        <Exec Command="powershell -Command &quot;if (Test-Path '$(PublishDir)appsettings.Development.json') { Remove-Item '$(PublishDir)appsettings.Development.json' -Force }&quot;" ContinueOnError="true" IgnoreExitCode="true" />
+        <Message Text="Removed development configuration files from $(PublishDir)" Importance="normal" />
+    </Target>
+
+    <Target Name="RemoveBundledFiles" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
+        <Exec Command="powershell -Command &quot;if (Test-Path '$(PublishDir)appsettings.json') { Remove-Item '$(PublishDir)appsettings.json' -Force }&quot;" ContinueOnError="true" IgnoreExitCode="true" />
+        <Exec Command="powershell -Command &quot;Get-ChildItem -Path '$(PublishDir)' -Filter '*.xml' | Remove-Item -Force&quot;" ContinueOnError="true" IgnoreExitCode="true" />
+        <Message Text="Removed bundled content files (these are included in the single-file executable)" Importance="normal" />
+    </Target>
+
+    <Target Name="RemoveStaticWebAssetsEndpoints" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
+        <Exec Command="powershell -Command &quot;Get-ChildItem -Path '$(PublishDir)' -Filter '*staticwebassets.endpoints*' -Recurse | Remove-Item -Force&quot;" ContinueOnError="true" IgnoreExitCode="true" />
+        <Message Text="Removed staticwebassets.endpoints files from $(PublishDir)" Importance="normal" />
+    </Target>
 
 </Project>

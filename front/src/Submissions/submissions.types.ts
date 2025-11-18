@@ -34,4 +34,3 @@ export type SubmissionResponse = {
 
 export type SubmissionStatus = 'Pending' | 'InReview' | 'Approved' | 'Rejected';
 export type PriorityLevel = 'Low' | 'Medium' | 'High' | 'Critical';
-

@@ -1,7 +1,7 @@
 using Plumsail.Interview.Domain.Entities;
 using Plumsail.Interview.Handlers.SubmissionHandlers;
-
 using System.Globalization;
+using System.Text.Json;
 
 namespace Plumsail.Interview.Handlers.FormReader;
 
@@ -14,62 +14,48 @@ public sealed class FileUploadFormReader : FileWithPropertiesFormReader<FileUplo
     {
         switch (propertyName)
         {
-            case nameof(FileUploadData.Description):
-                form = form with { Description = value };
-                break;
-            case nameof(FileUploadData.Status):
-                if (Enum.TryParse<SubmissionStatusEnum>(value, true, out var status))
-                {
-                    form = form with { Status = status };
-                }
-
-                break;
-            case nameof(FileUploadData.Priority):
-                if (Enum.TryParse<PriorityLevelEnum>(value, true, out var priority))
-                {
-                    form = form with { Priority = priority };
-                }
-
-                break;
-            case nameof(FileUploadData.IsPublic):
-                if (bool.TryParse(value, out var isPublic))
-                {
-                    form = form with { IsPublic = isPublic };
-                }
-
-                break;
-            case nameof(FileUploadData.CreatedDate):
-                if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var createdDate))
-                {
-                    form = form with { CreatedDate = createdDate };
-                }
-
-                break;
             case "File":
                 break;
             default:
-                var payload = form.Payload ?? new Dictionary<string, object>();
+                var payload = form.Payload ?? new Dictionary<string, JsonElement>();
                 
                 if (arrayIndex.HasValue)
                 {
                     // Handle array properties like Tags[0], Tags[1], etc.
-                    if (!payload.TryGetValue(propertyName, out var existingValue) || existingValue is not List<object> list)
+                    if (!payload.TryGetValue(propertyName, out var existingValue) || existingValue.ValueKind != JsonValueKind.Array)
                     {
-                        list = new List<object>();
-                        payload[propertyName] = list;
+                        var list = new List<JsonElement>();
+                        payload[propertyName] = JsonSerializer.SerializeToElement(
+                            list,
+                            HandlersJsonSerializerContext.Default.ListJsonElement);
                     }
+                    
+                    // Get existing array or create new one
+                    var array = payload[propertyName].ValueKind == JsonValueKind.Array 
+                        ? payload[propertyName].EnumerateArray().ToList() 
+                        : new List<JsonElement>();
                     
                     // Ensure list is large enough
-                    while (list.Count <= arrayIndex.Value)
+                    while (array.Count <= arrayIndex.Value)
                     {
-                        list.Add(null!);
+                        array.Add(JsonSerializer.SerializeToElement(
+                            (string?)null,
+                            HandlersJsonSerializerContext.Default.String));
                     }
                     
-                    list[arrayIndex.Value] = value;
+                    // Update the value at the specified index
+                    array[arrayIndex.Value] = JsonSerializer.SerializeToElement(
+                        value,
+                        HandlersJsonSerializerContext.Default.String);
+                    payload[propertyName] = JsonSerializer.SerializeToElement(
+                        array,
+                        HandlersJsonSerializerContext.Default.ListJsonElement);
                 }
                 else
                 {
-                    payload[propertyName] = value;
+                    payload[propertyName] = JsonSerializer.SerializeToElement(
+                        value,
+                        HandlersJsonSerializerContext.Default.String);
                 }
                 
                 form = form with { Payload = payload };

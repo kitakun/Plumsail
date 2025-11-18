@@ -11,7 +11,18 @@
         />
       </div>
       <button class="submit-button" @click="openModal">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="plus-icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="plus-icon"
+        >
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
@@ -39,12 +50,7 @@
             <td>{{ item.fileData.type }}</td>
             <td class="id-cell">{{ item.id }}</td>
             <td>
-              <button 
-                class="preview-button" 
-                @click="handlePreview(item)"
-              >
-                Preview
-              </button>
+              <button class="preview-button" @click="handlePreview(item)">Preview</button>
             </td>
           </tr>
           <tr v-if="submissions.length === 0">
@@ -63,17 +69,9 @@
       />
     </div>
 
-    <SubmissionModal
-      v-if="showModal"
-      @close="closeModal"
-      @submit="handleSubmit"
-    />
+    <SubmissionModal v-if="showModal" @close="closeModal" @submit="handleSubmit" />
 
-    <SubmissionPreviewModal
-      v-if="previewFile"
-      :file="previewFile"
-      @close="closePreview"
-    />
+    <SubmissionPreviewModal v-if="previewFile" :file="previewFile" @close="closePreview" />
   </div>
 </template>
 
@@ -101,10 +99,10 @@ const totalPages = computed(() => Math.ceil(totalCount.value / pageSize));
 const isValidFileSubmission = (fileRecord: FileRecord): boolean => {
   try {
     if (!fileRecord.fileData) return false;
-    
+
     const fileName = fileRecord.fileData.name;
     if (!fileName || fileName.trim() === '') return false;
-    
+
     if (fileName.startsWith('form-data-')) return false;
 
     const payload = fileRecord.payload;
@@ -123,8 +121,7 @@ const loadSubmissions = async () => {
     const offset = (currentPage.value - 1) * pageSize;
     const response = await submissionApi.getSubmissions(offset, pageSize);
     if (response.isSuccess && response.result) {
-      const filteredSubmissions = response.result.items
-        .filter(isValidFileSubmission);
+      const filteredSubmissions = response.result.items.filter(isValidFileSubmission);
       submissions.value = filteredSubmissions;
       totalCount.value = response.result.totalCount;
     } else {
@@ -142,7 +139,7 @@ const handleSearch = () => {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
   }
-  
+
   searchTimeout = setTimeout(async () => {
     currentPage.value = 1;
     if (searchTerm.value.trim()) {
@@ -150,10 +147,13 @@ const handleSearch = () => {
       error.value = null;
       try {
         const offset = (currentPage.value - 1) * pageSize;
-        const response = await submissionApi.searchSubmissions(searchTerm.value.trim(), offset, pageSize);
+        const response = await submissionApi.searchSubmissions(
+          searchTerm.value.trim(),
+          offset,
+          pageSize
+        );
         if (response.isSuccess && response.result) {
-          const filteredSubmissions = response.result.items
-            .filter(isValidFileSubmission);
+          const filteredSubmissions = response.result.items.filter(isValidFileSubmission);
           submissions.value = filteredSubmissions;
           totalCount.value = response.result.totalCount;
         } else {
@@ -176,7 +176,7 @@ const formatFileSize = (bytes: number): string => {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 };
 
 const openModal = () => {
@@ -201,10 +201,13 @@ const goToPage = async (page: number) => {
     error.value = null;
     try {
       const offset = (currentPage.value - 1) * pageSize;
-      const response = await submissionApi.searchSubmissions(searchTerm.value.trim(), offset, pageSize);
+      const response = await submissionApi.searchSubmissions(
+        searchTerm.value.trim(),
+        offset,
+        pageSize
+      );
       if (response.isSuccess && response.result) {
-        const filteredSubmissions = response.result.items
-          .filter(isValidFileSubmission);
+        const filteredSubmissions = response.result.items.filter(isValidFileSubmission);
         submissions.value = filteredSubmissions;
         totalCount.value = response.result.totalCount;
       } else {
@@ -445,4 +448,3 @@ onMounted(() => {
   font-style: italic;
 }
 </style>
-

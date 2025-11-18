@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storage", "Storage", "{FF44
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.MemoryFileStorage", "Plumsail.Interview.MemoryFileStorage\Plumsail.Interview.MemoryFileStorage.csproj", "{E09A636F-6429-4E2D-8DE0-5093ECF0B302}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.MemoryDatabase", "Plumsail.Interview.MemoryDatabase\Plumsail.Interview.MemoryDatabase.csproj", "{0A9C820D-5413-455A-A597-DCFD65DCACB7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.LiteMemoryDatabase", "Plumsail.Interview.LiteMemoryDatabase\Plumsail.Interview.LiteMemoryDatabase.csproj", "{0A9C820D-5413-455A-A597-DCFD65DCACB7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plumsail.Interview.DatabaseContext", "Plumsail.Interview.DatabaseContext\Plumsail.Interview.DatabaseContext.csproj", "{FA70050B-A515-4D54-B0A7-0EEECA3E2F78}"
 EndProject
